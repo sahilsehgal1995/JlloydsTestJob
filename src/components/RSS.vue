@@ -36,20 +36,24 @@ export default {
   },
   methods: {
     getRssFields: function(event){
-      console.log("getRssFields", event, this.$http.get);
-      var data = {
+      var requestParams = {
         dataType: 'json',
         params:{
           rss_url: this.url
         }
       }
-      this.$http.get('https://api.rss2json.com/v1/api.json', data)
+      this.$http.get('https://api.rss2json.com/v1/api.json', requestParams)
       .then(function(response){
           console.log("response", response);
           this.fields = [];
           if (response.body.status === 'ok'){
-            this.error = ''
-            this.fields = response.body.items
+            if (response.body.items.length){
+              this.error = ''
+              this.fields = response.body.items
+            }
+            else{
+              this.error = 'No RSS fields were found. Try some other url.'
+            }
             return true
           }
           this.error = response.body.message
