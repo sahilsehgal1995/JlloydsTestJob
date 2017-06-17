@@ -6,7 +6,18 @@
     </div>
     <br>
     <div class="problem">
-      Implementation: 
+      Implementation:
+      <br>
+      Steps: 
+      <ul>
+        <li>Step 1: Click on Open new tab button</li>
+        <li>Step 2: Start typing in this window. You'll see the changes reflected to the new window</li>
+      </ul>
+      <button v-on:click="openTab">Open new tab</button>
+      <br>
+      <input type="text" v-model="message" placeholder="Enter message">
+      <br>
+      {{message}} 
     </div>
   </div>
 </template>
@@ -16,8 +27,37 @@ export default {
   name: 'InterBrowser',
   data () {
     return {
-      
+      message: "",
+      newWindow: null
     }
+  },
+  methods: {
+    openTab: function(){
+      console.log("open tab", window.location.href)
+      this.newWindow = window.open(window.location.href)
+      console.log("newWindow", this.newWindow)
+    },
+    receiveMessage: function(event){
+      //console.log("recieveMessage", event)
+      if (event.origin !== window.location.origin){
+        // Origin matching to prevent XSS attack.
+        return;
+      }
+      this.message = event.data
+      console.log(event.data)
+    }
+  },
+  watch: {
+    'message': function(newValue, oldValue){
+      if( oldValue !== newValue){
+        this.newWindow.postMessage(this.message, window.location.href)
+      }
+    }
+  },
+  mounted(){
+    this.$nextTick(function(){
+      window.addEventListener('message', this.receiveMessage, false)
+    })
   }
 }
 </script>
